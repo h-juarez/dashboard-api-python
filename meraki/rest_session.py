@@ -236,7 +236,7 @@ class RestSession(object):
                     else:
                         wait = random.randint(1, self._nginx_429_retry_wait_time)
                     if self._logger:
-                        self._logger.warning(f'{tag}, {operation} - {status} {reason}, retrying in {wait} seconds')
+                        self._logger.warning(f'{tag}, {operation} - {status} {reason} {retries}, retrying in {wait} seconds')
                     time.sleep(wait)
                     retries -= 1
                     if retries == 0:
@@ -270,7 +270,7 @@ class RestSession(object):
                             and network_delete_concurrency_error_text in message['errors'][0]:
                         wait = random.randint(30, self._network_delete_retry_wait_time)
                         if self._logger:
-                            self._logger.warning(f'{tag}, {operation} - {status} {reason}, retrying in {wait} seconds')
+                            self._logger.warning(f'{tag}, {operation} - {status} {reason} {retries}, retrying in {wait} seconds')
                         time.sleep(wait)
                         retries -= 1
                         if retries == 0:
@@ -279,7 +279,7 @@ class RestSession(object):
                     elif message == action_batch_concurrency_error:
                         wait = self._action_batch_retry_wait_time
                         if self._logger:
-                            self._logger.warning(f'{tag}, {operation} - {status} {reason}, retrying in {wait} seconds')
+                            self._logger.warning(f'{tag}, {operation} - {status} {reason} {retries}, retrying in {wait} seconds')
                         time.sleep(wait)
                         retries -= 1
                         if retries == 0:
@@ -287,7 +287,7 @@ class RestSession(object):
                     elif self._retry_4xx_error:
                         wait = random.randint(1, self._retry_4xx_error_wait_time)
                         if self._logger:
-                            self._logger.warning(f'{tag}, {operation} - {status} {reason}, retrying in {wait} seconds')
+                            self._logger.warning(f'{tag}, {operation} - {status} {reason} {retries}, retrying in {wait} seconds')
                         time.sleep(wait)
                         retries -= 1
                         if retries == 0:
