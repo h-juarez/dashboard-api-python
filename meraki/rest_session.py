@@ -231,7 +231,7 @@ class RestSession(object):
 
                 # Rate limit 429 errors
                 elif status == 429:
-                    if 'Retry-After' in response.headers:
+                    if False and 'Retry-After' in response.headers:
                         wait = int(response.headers['Retry-After'])
                     else:
                         wait = random.randint(1, self._nginx_429_retry_wait_time)
