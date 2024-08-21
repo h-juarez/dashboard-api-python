@@ -232,12 +232,12 @@ class RestSession(object):
 
                 # Rate limit 429 errors
                 elif status == 429:
-                    if 'Retry-After' in response.headers:
+                    if False and 'Retry-After' in response.headers:
                         wait = int(response.headers['Retry-After'])
                     else:
                         wait = random.randint(1, self._nginx_429_retry_wait_time)
                     if self._logger:
-                        self._logger.warning(f'{tag}, {operation} - {status} {reason}, retrying in {wait} seconds')
+                        self._logger.warning(f'{tag}, {operation} - {status} {reason} {retries}, retrying in {wait} seconds')
                     time.sleep(wait)
                     retries -= 1
                     if retries == 0:
@@ -245,9 +245,10 @@ class RestSession(object):
 
                 # 5XX errors
                 elif status >= 500:
+                    wait = random.randint(1, self._nginx_429_retry_wait_time)
                     if self._logger:
-                        self._logger.warning(f'{tag}, {operation} - {status} {reason}, retrying in 1 second')
-                    time.sleep(1)
+                        self._logger.warning(f'{tag}, {operation} - {status} {reason} {retries}, retrying in {wait} seconds')
+                    time.sleep(wait)
                     retries -= 1
                     if retries == 0:
                         raise APIError(metadata, response)
@@ -271,7 +272,7 @@ class RestSession(object):
                             and network_delete_concurrency_error_text in message['errors'][0]:
                         wait = random.randint(30, self._network_delete_retry_wait_time)
                         if self._logger:
-                            self._logger.warning(f'{tag}, {operation} - {status} {reason}, retrying in {wait} seconds')
+                            self._logger.warning(f'{tag}, {operation} - {status} {reason} {retries}, retrying in {wait} seconds')
                         time.sleep(wait)
                         retries -= 1
                         if retries == 0:
@@ -280,7 +281,7 @@ class RestSession(object):
                     elif message == action_batch_concurrency_error:
                         wait = self._action_batch_retry_wait_time
                         if self._logger:
-                            self._logger.warning(f'{tag}, {operation} - {status} {reason}, retrying in {wait} seconds')
+                            self._logger.warning(f'{tag}, {operation} - {status} {reason} {retries}, retrying in {wait} seconds')
                         time.sleep(wait)
                         retries -= 1
                         if retries == 0:
@@ -288,7 +289,7 @@ class RestSession(object):
                     elif self._retry_4xx_error:
                         wait = random.randint(1, self._retry_4xx_error_wait_time)
                         if self._logger:
-                            self._logger.warning(f'{tag}, {operation} - {status} {reason}, retrying in {wait} seconds')
+                            self._logger.warning(f'{tag}, {operation} - {status} {reason} {retries}, retrying in {wait} seconds')
                         time.sleep(wait)
                         retries -= 1
                         if retries == 0:
