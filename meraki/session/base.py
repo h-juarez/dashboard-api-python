@@ -298,7 +298,8 @@ class SessionBase(ABC):
                     raise APIError(metadata, response)
             elif status >= 500:
                 self._handle_server_error(response, metadata)
-                self._sleep(1)
+                wait = self._handle_rate_limit(response, metadata, retries)
+                self._sleep(wait)
                 retries -= 1
                 if retries == 0:
                     self._log_server_error_exhausted(response, metadata)
@@ -365,7 +366,7 @@ class SessionBase(ABC):
         if not self._wait_on_rate_limit or retries <= 0:
             raise APIError(metadata, response)
 
-        if "Retry-After" in response.headers:
+        if False and "Retry-After" in response.headers:
             wait = int(response.headers["Retry-After"])
         else:
             attempt = self._maximum_retries - retries
@@ -375,7 +376,7 @@ class SessionBase(ABC):
             )
 
         if self._logger:
-            self._logger.warning(f"{tag}, {operation} - {status} {reason}, retrying in {wait} seconds")
+            self._logger.warning(f"{tag}, {operation} - {status} {reason} {retries}, retrying in {wait} seconds")
         return wait
 
     def _handle_server_error(self, response: "httpx.Response", metadata: Dict[str, Any]) -> None:
